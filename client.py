@@ -1,5 +1,7 @@
 import socket
 
+from packet_constants import *
+
 from tkinter import *
 from tkinter import ttk
 from tkinter import StringVar
@@ -11,12 +13,14 @@ from client_listener import Listener
 class Manager():
     def __init__(self):
         self.conn = None
+        self.ready = False
 
     def connect(self):
         print(f"connecting with ip: {hostname.get()}, port: {port.get()}")
         self.conn = socket.create_connection((hostname.get(), int(port.get())))
-        self.conn.send(f"{username.get()} joined.".encode('ascii'))
-        listener = Listener(self.conn, self.add_chat)
+        self.conn.send(
+            bytes([NEW_CONNECTION, len(username.get())]) + username.get().encode())
+        listener = Listener(self.conn, self)
         listener.setDaemon(True)
         listener.start()
         connector.destroy()
@@ -26,8 +30,12 @@ class Manager():
         chat_history.set(chat_history.get() + f'\n{msg}')
 
     def send_chat(self):
-        self.conn.send(f'{username.get()}: {chat.get()}'.encode('ascii'))
-        chat.set('')  # clear chat after sending a message
+        if self.ready:
+            self.conn.send(bytes([BROADCAST_MESSAGE, len(chat.get())]) +
+                           chat.get().encode('ascii'))
+            chat.set('')  # clear sendbox after sending a message
+        else:
+            print('not ready')
 
 
 manager = Manager()
