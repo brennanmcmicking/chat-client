@@ -21,7 +21,7 @@ class Manager():
         self.conn.send(
             bytes([NEW_CONNECTION, len(username.get())]) + username.get().encode())
         listener = Listener(self.conn, self)
-        listener.setDaemon(True)
+        listener.daemon = True
         listener.start()
         connector.destroy()
 

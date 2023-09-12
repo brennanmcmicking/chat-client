@@ -15,7 +15,7 @@ class NewConnectionListener(threading.Thread):
     def __init__(self, server):
         self.server = server
         super(NewConnectionListener, self).__init__()
-        self.setDaemon(True)
+        self.daemon = True
 
     def run(self):
         while True:
@@ -68,6 +68,9 @@ class Server:
 
         if packet[0] == TERMINATE_CONNECTION:
             self.handle_disconnect(packet, conn)
+        
+        if packet[0] == KEEPALIVE_COMM:
+            print("received KEEPALIVE")
 
     def handle_disconnect(self, packet, dead_conn):
         for uname, conn, lastseen in self.conns:
@@ -95,7 +98,7 @@ class ServerKeepAlive(threading.Thread):
     def __init__(self, server: Server):
         self.server: Server = server
         super(ServerKeepAlive, self).__init__()
-        self.setDaemon(True)
+        self.daemon = True
 
     def run(self):
         while True:
@@ -105,6 +108,7 @@ class ServerKeepAlive(threading.Thread):
 
                 # ping each connection in conn
                 conn[0].sendall(bytes([KEEPALIVE_COMM]))
+                print("sent KEEPALIVE")
 
             sleep(60)
 

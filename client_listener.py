@@ -29,4 +29,5 @@ class Listener(threading.Thread):
                     pass
 
                 if data[0] == KEEPALIVE_COMM:
-                    self.conn.sendall([KEEPALIVE_COMM])
+                    print(f'received KEEPALIVE')
+                    self.conn.sendall(bytes([KEEPALIVE_COMM]))
